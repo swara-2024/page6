@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drawing App 🎨</title>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-image: url('./a.png'); /* Replace with the actual path to your image */
+            background-size: 600px 550px; /* Adjust the size as needed */
+            background-position: center;
+            background-repeat: no-repeat; /* Prevent image from repeating */
+        }
+
+        .container1 {
+            float: left;
+            width: 50%;
+            height: 30px;
+        }
+
+        .container2 {
+            float: left;
+            width: 50%;
+            height: 30%;
+            padding-left: 25px;
+        }
+
+        .nav {
+            width: auto;
+            height: 50px;
+            position: fixed;
+            top: 1%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            transition: opacity .5s;
+            background: linear-gradient(to right, #4568DC, #B06AB3);
+            padding: 10px;
+            border-radius: 10px;
+            border: 3px solid white;
+        }
+
+        .screenshot {
+            position: absolute;
+            top: 75%;
+            margin-top: 50%;
+            right: 0;
+            transform: translate(0, -50%);
+            width: 10%;
+            height: 100%;
+        }
+
+        img {
+            position: absolute;
+            top: 35%;
+            left:15%;
+            right:80%;
+            transform: translate(-50%, -50%);
+        }
+
+        .nav div,
+        button,
+        input {
+            margin: 5px;
+        }
+
+        .nav:hover {
+            cursor: pointer;
+        }
+
+        button:hover {
+            cursor: pointer;
+        }
+
+        .clr {
+            height: 35px;
+            width: 35px;
+            background-color: blue;
+            border-radius: 50%;
+            border: 3px solid white;
+            transition: transform .5s;
+        }
+
+        .clr:hover {
+            transform: scale(1.2);
+        }
+
+        .clr:nth-child(1) {
+            background-color: #000;
+        }
+
+        .clr:nth-child(2) {
+            background-color: red;
+        }
+
+        .clr:nth-child(3) {
+            background-color: orange;
+        }
+
+        .clr:nth-child(4) {
+            background-color: blue;
+        }
+
+        button {
+            border: none;
+            outline: none;
+            padding: .6em 1em;
+            border-radius: 3px;
+            background-color: #03bb56;
+            color: #fff;
+            border: 3px solid white;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .save {
+            background-color: #0f65d4;
+        }
+
+        input[type="color"] {
+            width: 60px;
+            height: 40px;
+        }
+
+        canvas {
+            background-color: rgba(251, 252, 252, 0.8);
+        }
+
+        .left-panel {
+            float: left;
+            width: 30%;
+            padding: 20px;
+        }
+
+        .left-panel img {
+            max-width: 30%;
+            height: auto;
+            border-radius: 8px;
+        }
+        .left-panel img{
+            margin-top: 8%;
+        }
+
+        .next-button {
+    position: fixed;
+    top: 30px;
+    right: 50px;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 3px 4px 0px 0px #54a3f7;
+	background:linear-gradient(to bottom, #007dc1 5%, #0061a7 100%);
+	background-color:#007dc1;
+	border-radius:5px;
+	border:1px solid #124d77;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:17px;
+	font-weight:bold;
+	padding:12px 44px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #154682;
+}
+
+.next-button a{
+  text-decoration: none;
+  color: #fff;
+}
+.next-button:hover{
+    background:linear-gradient(to bottom, #0061a7 5%, #007dc1 100%);
+	background-color:#0061a7;
+}
+    </style>
+</head>
+<body>
+    <button class="next-button"><a href="/language-option-page/index.html">Next</a></button>
+    <div class="left-panel">
+        <img src="./apple-png-49400.png" alt="apple">
+    </div>
+
+    <canvas id="canvas"></canvas>
+    <div class="nav">
+        <div class="clr" data-clr="#000"></div>
+        <div class="clr" data-clr="red"></div>
+        <div class="clr" data-clr="orange"></div>
+        <button class="clear">Clear</button>
+        <input type="color" id="favcolor" value="#FFFFFF">
+        <input type="range" name="ageInputName" id="ageInputId" value="5" min="1" max="10" oninput="ageOutputId.value = ageInputId.value">
+        <output id="ageOutputId">5</output>
+    </div>
+
+
+
+    <script>
+        const canvas = document.getElementById("canvas")
+        const body = document.body;
+        canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth;
+        var theColor = '';
+        var lineW = 5;
+        let prevX = null
+        let prevY = null
+        let draw = false
+
+        body.style.backgroundColor = "#FFFFFF";
+        var theInput = document.getElementById("favcolor");
+
+        theInput.addEventListener("input", function(){
+            theColor = theInput.value;
+            body.style.backgroundColor = theColor;
+        }, false);
+
+        const ctx = canvas.getContext("2d")
+        ctx.lineWidth = lineW;
+        ctx.lineCap = "round";
+
+        document.getElementById("ageInputId").oninput = function() {
+            lineW = document.getElementById("ageInputId").value;
+            document.getElementById("ageOutputId").innerHTML = lineW;
+            ctx.lineWidth = lineW;
+        };  
+
+        let clrs = document.querySelectorAll(".clr")
+        clrs = Array.from(clrs)
+        clrs.forEach(clr => {
+            clr.addEventListener("click", () => {
+                ctx.strokeStyle = clr.dataset.clr;
+            })
+        })
+
+        let clearBtn = document.querySelector(".clear")
+        clearBtn.addEventListener("click", () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        })
+
+        canvas.addEventListener("mousedown", (e) => {
+            draw = true;
+            prevX = e.clientX;
+            prevY = e.clientY;
+        });
+
+        canvas.addEventListener("mouseup", () => draw = false);
+
+        canvas.addEventListener("mousemove", (e) => {
+            if (!draw) return;
+
+            let currentX = e.clientX;
+            let currentY = e.clientY;
+
+            ctx.beginPath();
+            ctx.moveTo(prevX, prevY);
+            ctx.lineTo(currentX, currentY);
+            ctx.stroke();
+
+            prevX = currentX;
+            prevY = currentY;
+        });
+    </script>
+
+</body>
+</html>
